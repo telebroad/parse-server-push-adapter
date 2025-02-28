@@ -6,7 +6,7 @@ import log from 'npmlog';
 import Parse from 'parse';
 import { randomString } from './PushAdapterUtils.js';
 
-const LOG_PREFIX = 'parse-server-push-adapter FCM';
+const LOG_PREFIX = 'Telebroad parse-server-push-adapter FCM';
 const FCMRegistrationTokensMax = 500;
 const FCMTimeToLiveMax = 4 * 7 * 24 * 60 * 60; // FCM allows a max of 4 weeks
 const apnsIntegerDataKeys = [
@@ -94,6 +94,10 @@ FCM.prototype.send = function (data, devices) {
     // This is a safe wrapper for sendEachForMulticast, due to bug in the firebase-admin
     // library, where it throws an exception instead of returning a rejected promise
     const sendEachForMulticastSafe = fcmPayloadData => {
+      // FIX for web, add notification
+      fcmPayloadData.notification = fcmPayloadData.android.notification || {};
+
+      log.info('fcmPayloadData', fcmPayloadData)
       try {
         return this.sender.sendEachForMulticast(fcmPayloadData);
       } catch (err) {
