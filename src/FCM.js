@@ -96,8 +96,8 @@ FCM.prototype.send = function (data, devices) {
     const sendEachForMulticastSafe = fcmPayloadData => {
       // FIX for web, add notification
       fcmPayloadData.notification = fcmPayloadData.android.notification || {};
+      log.info('fcmPayloadData', fcmPayloadData);
 
-      log.info('fcmPayloadData', fcmPayloadData)
       try {
         return this.sender.sendEachForMulticast(fcmPayloadData);
       } catch (err) {

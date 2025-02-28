@@ -41,7 +41,7 @@ export default class ParsePushAdapter {
         }
         break;
       case 'web':
-        this.senderMap[pushType] = new WEB(pushConfig[pushType]);
+        this.senderMap[pushType] = new WEB(pushConfig[pushType], 'android');
         break;
       case 'expo':
         this.senderMap[pushType] = new EXPO(pushConfig[pushType]);

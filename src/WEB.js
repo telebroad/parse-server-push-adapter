@@ -17,7 +17,7 @@ const apnsIntegerDataKeys = [
   'expiration_time',
 ];
 
-export default function FCM(args, pushType) {
+export default function WEB(args, pushType) {
   if (typeof args !== 'object' || !args.firebaseServiceAccount) {
     throw new Parse.Error(
       Parse.Error.PUSH_MISCONFIGURED,
@@ -50,7 +50,7 @@ export default function FCM(args, pushType) {
   this.pushType = pushType;
 }
 
-FCM.FCMRegistrationTokensMax = FCMRegistrationTokensMax;
+WEB.FCMRegistrationTokensMax = FCMRegistrationTokensMax;
 
 /**
  * Send fcm request.
@@ -59,7 +59,7 @@ FCM.FCMRegistrationTokensMax = FCMRegistrationTokensMax;
  * @returns {Object} Array of resolved promises
  */
 
-FCM.prototype.send = function (data, devices) {
+WEB.prototype.send = function (data, devices) {
   if (!data || !devices || !Array.isArray(devices)) {
     log.warn(LOG_PREFIX, 'invalid push payload');
     return;
@@ -67,7 +67,7 @@ FCM.prototype.send = function (data, devices) {
 
   // We can only have 500 recepients per send, so we need to slice devices to
   // chunk if necessary
-  const slices = sliceDevices(devices, FCM.FCMRegistrationTokensMax);
+  const slices = sliceDevices(devices, WEB.FCMRegistrationTokensMax);
 
   const sendToDeviceSlice = (deviceSlice, pushType) => {
     const pushId = randomString(10);
@@ -94,6 +94,10 @@ FCM.prototype.send = function (data, devices) {
     // This is a safe wrapper for sendEachForMulticast, due to bug in the firebase-admin
     // library, where it throws an exception instead of returning a rejected promise
     const sendEachForMulticastSafe = fcmPayloadData => {
+      // FIX for web, add notification
+      fcmPayloadData.notification = fcmPayloadData.android.notification || {};
+      log.info('fcmPayloadData', fcmPayloadData);
+
       try {
         return this.sender.sendEachForMulticast(fcmPayloadData);
       } catch (err) {
@@ -418,9 +422,9 @@ function createSuccessfulPromise(token, deviceType) {
   });
 }
 
-FCM.generateFCMPayload = generateFCMPayload;
+WEB.generateFCMPayload = generateFCMPayload;
 
 /* istanbul ignore else */
 if (process.env.TESTING) {
-  FCM.sliceDevices = sliceDevices;
+  WEB.sliceDevices = sliceDevices;
 }
