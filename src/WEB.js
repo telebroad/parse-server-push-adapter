@@ -94,8 +94,6 @@ WEB.prototype.send = function (data, devices) {
     // This is a safe wrapper for sendEachForMulticast, due to bug in the firebase-admin
     // library, where it throws an exception instead of returning a rejected promise
     const sendEachForMulticastSafe = fcmPayloadData => {
-      // FIX for web, add notification
-      fcmPayloadData.notification = fcmPayloadData.android.notification || {};
       log.info('fcmPayloadData', fcmPayloadData);
 
       try {
@@ -283,6 +281,13 @@ function _GCMToFCMPayload(requestData, pushId, timeStamp) {
 
   if (requestData.hasOwnProperty('notification')) {
     androidPayload.android.notification = requestData.notification;
+
+    // FIX for web notification
+    // if (requestData.hasOwnProperty('notification')) {
+    //   androidPayload.notification = requestData.notification;
+    // } else {
+    //   androidPayload.notification = {}
+    // }
   }
 
   if (requestData.hasOwnProperty('data')) {
@@ -292,6 +297,17 @@ function _GCMToFCMPayload(requestData, pushId, timeStamp) {
         delete requestData.data[key]
       }
     }
+    // move alert to title
+    // if (requestData.data.hasOwnProperty('alert')) {
+      // if notification object was previously set
+      // if (androidPayload.hasOwnProperty('notification')) {
+      //   androidPayload.notification.title = requestData.data.alert;
+      // }
+    // }
+
+    // copy data in exterior
+    androidPayload.data = requestData.data;
+
     androidPayload.android.data = {
       push_id: pushId,
       time: new Date(timeStamp).toISOString(),
